@@ -100,61 +100,59 @@
     <div class="key special" onclick="sendKey('Backspace')">⌫</div>
   </div>
 
-  <script>
-      // Create WebSocket connection
-    const socket = new WebSocket('ws://localhost:3006');
 
-    // Function to send keypresses to WebSocket server
-    const sendKeyToServer = (key) => {
-      socket.send(key); // Send the key to WebSocket server
+<script>
+  const socket = new WebSocket("ws://localhost:3006");
+
+  const alphabetKeys = [
+    ['q','w','e','r','t','y','u','i','o','p'],
+    ['a','s','d','f','g','h','j','k','l'],
+    ['z','x','c','v','b','n','m',' ']
+  ];
+
+  const specialKeys = [
+    ['Esc', 'Tab', 'CapsLock', 'Enter', 'Backspace'],
+    ['Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown'],
+    ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
+    ['Shift', 'Ctrl', 'Alt', 'Meta'],
+    ['F1','F2','F3','F4','F5','F6'],
+    ['F7','F8','F9','F10','F11','F12']
+  ];
+
+  let usingSpecial = false;
+
+  const sendKey = (key) => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(key);
+    }
+  };
+
+  const buildKeyboard = () => {
+    const container = document.getElementById("keyboard");
+    container.innerHTML = "";
+
+    const toggleBtn = document.createElement("div");
+    toggleBtn.className = "key switch";
+    toggleBtn.innerText = "ABC/Special";
+    toggleBtn.onclick = () => {
+      usingSpecial = !usingSpecial;
+      buildKeyboard();
     };
-    const alphabetKeys = [
-      ['q','w','e','r','t','y','u','i','o','p'],
-      ['a','s','d','f','g','h','j','k','l'],
-      ['z','x','c','v','b','n','m',' ']
-    ];
-    const specialKeys = [
-      ['1','2','3','4','5','6','7','8','9','0'],
-      ['!','@','#','$','%','^','&','*','(',')'],
-      ['-','_','=','+','[','\\',']','{','}','|'],
-      [';',':','\'','"',',','.','/','<','>','?','`','~']
-    ];
-    let usingSpecialKeys = false; // Track whether we're in special characters mode
+    container.appendChild(toggleBtn);
 
-    // Function to create the keyboard UI
-    const createKeyboard = () => {
-      const keyboardContainer = document.getElementById('keyboard');
-      // Add button to switch between alphabetic and special keys
-      const toggleButton = document.createElement('div');
-      toggleButton.classList.add('key', 'switch');
-      toggleButton.textContent = "ABC/Special";
-      toggleButton.onclick = toggleKeyboardMode;
-      keyboardContainer.appendChild(toggleButton);
-
-      // Create rows of keys (alphabetical or special)
-      const keysToUse = usingSpecialKeys ? specialKeys : alphabetKeys;
-      keysToUse.forEach(row => {
-        row.forEach(key => {
-          const keyButton = document.createElement('div');
-          keyButton.classList.add('key');
-          keyButton.textContent = key;
-
-          // Regular key behavior
-          keyButton.onclick = () => sendKeyToServer(key); // Send key to WebSocket
-          keyboardContainer.appendChild(keyButton);
-        });
+    const layout = usingSpecial ? specialKeys : alphabetKeys;
+    layout.forEach(row => {
+      row.forEach(k => {
+        const key = document.createElement("div");
+        key.className = "key";
+        key.innerText = k === " " ? "Space" : k;
+        key.onclick = () => sendKey(k);
+        container.appendChild(key);
       });
-    };
+    });
+  };
 
-    // Toggle between special characters and alphabet mode
-    const toggleKeyboardMode = () => {
-      usingSpecialKeys = !usingSpecialKeys; // Toggle the mode
-      document.getElementById('keyboard').innerHTML = ''; // Clear previous keyboard
-      createKeyboard(); // Rebuild keyboard
-    };
-
-    // Initialize the keyboard
-    createKeyboard();
-  </script>
+  buildKeyboard();
+</script>
 </body>
 </html>

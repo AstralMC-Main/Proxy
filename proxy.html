@@ -39,25 +39,31 @@
     <input id="inputBox" type="text" placeholder="Enter command..." autocomplete="off" autocorrect="off" autocapitalize="off" />
   </div>
 
-  <script>
-    const socket = new WebSocket("wss://backendconsole2469.serveo.net");
-    const input = document.getElementById("inputBox");
+<script>
+  const socket = new WebSocket("wss://backendconsole2469.serveo.net");
+  const input = document.getElementById("inputBox");
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && socket.readyState === WebSocket.OPEN) {
-        e.preventDefault();
-        const command = input.value.trim();
-        if (command) {
-          socket.send(command);
-          input.value = "";
-        }
-      }
-    });
+  const sendCommand = () => {
+    const command = input.value;
+    if (command && socket.readyState === WebSocket.OPEN) {
+      socket.send(command + "\n");  // Add newline to simulate Enter key
+      input.value = "";
+    }
+  };
 
-    // Focus input on page tap for mobile convenience
-    document.body.addEventListener("touchstart", () => {
-      input.focus();
-    });
-  </script>
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendCommand();
+    }
+  });
+
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendCommand();
+    }
+  });
+</script>
 </body>
 </html>

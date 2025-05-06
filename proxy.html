@@ -33,15 +33,29 @@
   </style>
 </head>
 <body>
-  <textarea
-  id="fakeInput"
-  style="position:fixed; bottom:0; width:100%; height:40px; opacity:0; z-index:999;">
-  </textarea>
+<textarea id="iosInput" style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  opacity: 0.01;
+  z-index: 100;
+" autofocus></textarea>
   <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net"></iframe>
 <script>
-  document.getElementById('terminalFrame').addEventListener('click', () => {
-    document.getElementById('fakeInput').focus();
-  });
+const socket = new WebSocket('ws://backendconsole2469.serveo.net');
+
+document.getElementById('iosInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const val = e.target.value.trim();
+    if (val && socket.readyState === WebSocket.OPEN) {
+      socket.send(val + '\n');
+    }
+    e.target.value = '';
+  }
+});
 </script>
 </body>
 </html>

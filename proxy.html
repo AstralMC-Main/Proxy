@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>iOS Keyboard Integration</title>
+  <title>iOS Keyboard Terminal</title>
   <style>
     body, html {
       margin: 0;
@@ -28,6 +28,7 @@
       padding: 10px;
       border: 2px solid #ccc;
       border-radius: 8px;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -35,28 +36,25 @@
   <iframe src="https://backendconsole2468.serveo.net"></iframe>
 
   <div class="input-overlay">
-    <input id="inputBox" type="text" placeholder="Type here..." />
+    <input id="inputBox" type="text" placeholder="Enter command..." autocomplete="off" autocorrect="off" autocapitalize="off" />
   </div>
 
   <script>
     const socket = new WebSocket("wss://backendconsole2469.serveo.net");
     const input = document.getElementById("inputBox");
 
-    input.addEventListener("input", () => {
-      if (socket.readyState === WebSocket.OPEN) {
-        const value = input.value;
-        socket.send(value);
-        input.value = ""; // Clear input after sending
-      }
-    });
-
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault(); // Prevent newline if needed
+      if (e.key === "Enter" && socket.readyState === WebSocket.OPEN) {
+        e.preventDefault();
+        const command = input.value.trim();
+        if (command) {
+          socket.send(command);
+          input.value = "";
+        }
       }
     });
 
-    // Optional: focus input automatically on tap anywhere
+    // Focus input on page tap for mobile convenience
     document.body.addEventListener("touchstart", () => {
       input.focus();
     });

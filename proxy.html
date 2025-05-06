@@ -131,15 +131,6 @@
     const container = document.getElementById("keyboard");
     container.innerHTML = "";
 
-    const toggleBtn = document.createElement("div");
-    toggleBtn.className = "key switch";
-    toggleBtn.innerText = "ABC/Special";
-    toggleBtn.onclick = () => {
-      usingSpecial = !usingSpecial;
-      buildKeyboard();
-    };
-    container.appendChild(toggleBtn);
-
     const layout = usingSpecial ? specialKeys : alphabetKeys;
     layout.forEach(row => {
       row.forEach(k => {
@@ -150,6 +141,16 @@
         container.appendChild(key);
       });
     });
+
+    // Add the toggle button at the end so it survives the rebuild
+    const toggleBtn = document.createElement("div");
+    toggleBtn.className = "key switch";
+    toggleBtn.innerText = "ABC/Special";
+    toggleBtn.onclick = () => {
+      usingSpecial = !usingSpecial;
+      buildKeyboard();
+    };
+    container.appendChild(toggleBtn);
   };
 
   buildKeyboard();

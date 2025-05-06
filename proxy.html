@@ -101,57 +101,63 @@
   </div>
 
 
-<script>
-  const socket = new WebSocket("wss://backendconsole2469.serveo.net");
+  <script>
+    const socket = new WebSocket("wss://backendconsole2469.serveo.net");
 
-  const alphabetKeys = [
-    ['q','w','e','r','t','y','u','i','o','p'],
-    ['a','s','d','f','g','h','j','k','l'],
-    ['z','x','c','v','b','n','m',' ']
-  ];
+    const alphabetKeys = [
+      ['q','w','e','r','t','y','u','i','o','p'],
+      ['a','s','d','f','g','h','j','k','l'],
+      ['z','x','c','v','b','n','m',' ']
+    ];
 
-  const specialKeys = [
-    ['Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown'],
-    ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
-    ['Shift', 'Ctrl', 'Alt', 'Meta'],
-    ['F1','F2','F3','F4','F5','F6'],
-    ['F7','F8','F9','F10','F11','F12']
-  ];
+    const specialKeys = [
+      ['Esc', 'Tab', 'CapsLock', 'Enter', 'Backspace'],
+      ['Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown'],
+      ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
+      ['Shift', 'Ctrl', 'Alt', 'Meta'],
+      ['F1','F2','F3','F4','F5','F6'],
+      ['F7','F8','F9','F10','F11','F12']
+    ];
 
-  let usingSpecial = false;
+    let usingSpecial = false;
 
-  const sendKey = (key) => {
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(key);
-    }
-  };
-
-  const buildKeyboard = () => {
-    const container = document.getElementById("keyboard");
-    container.innerHTML = "";
-
-    const layout = usingSpecial ? specialKeys : alphabetKeys;
-    layout.forEach(row => {
-      row.forEach(k => {
-        const key = document.createElement("div");
-        key.className = "key";
-        key.innerText = k === " " ? "Space" : k;
-        key.onclick = () => sendKey(k);
-        container.appendChild(key);
-      });
-    });
-
-    const toggleBtn = document.createElement("div");
-    toggleBtn.className = "key switch";
-    toggleBtn.innerText = usingSpecial ? "ABC" : "123";
-    toggleBtn.onclick = () => {
-      usingSpecial = !usingSpecial;
-      buildKeyboard();
+    const sendKey = (key) => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(key);
+      }
     };
-    container.appendChild(toggleBtn);
-  };
 
-  buildKeyboard();
-</script>
+    const buildKeyboard = () => {
+      const container = document.getElementById("keyboardContainer");
+      container.innerHTML = "";
+
+      const layout = usingSpecial ? specialKeys : alphabetKeys;
+      layout.forEach(row => {
+        row.forEach(k => {
+          const key = document.createElement("div");
+          key.className = "key";
+          key.innerText = k === " " ? "Space" : k;
+          key.onclick = () => sendKey(k);
+          container.appendChild(key);
+        });
+      });
+
+      const toggleBtn = document.createElement("div");
+      toggleBtn.className = "key switch";
+      toggleBtn.innerText = usingSpecial ? "ABC" : "123";
+      toggleBtn.onclick = () => {
+        usingSpecial = !usingSpecial;
+        buildKeyboard();
+      };
+      container.appendChild(toggleBtn);
+    };
+
+    const toggleKeyboard = () => {
+      const container = document.getElementById("keyboardContainer");
+      container.classList.toggle("hidden");
+    };
+
+    buildKeyboard();
+  </script>
 </body>
 </html>

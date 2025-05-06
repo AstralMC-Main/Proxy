@@ -102,7 +102,7 @@
 
 
 <script>
-  const socket = new WebSocket("ws://localhost:3006");
+  const socket = new WebSocket("wss://backendconsole2469.serveo.net");
 
   const alphabetKeys = [
     ['q','w','e','r','t','y','u','i','o','p'],
@@ -130,12 +130,7 @@
   const buildKeyboard = () => {
     const container = document.getElementById("keyboard");
     container.innerHTML = "";
-const toggleBtn = document.getElementById("toggleKeyboardBtn");
-const keyboard = document.getElementById("keyboard");
 
-toggleBtn.onclick = () => {
-  keyboard.style.display = (keyboard.style.display === "none") ? "flex" : "none";
-};
     const layout = usingSpecial ? specialKeys : alphabetKeys;
     layout.forEach(row => {
       row.forEach(k => {
@@ -147,10 +142,9 @@ toggleBtn.onclick = () => {
       });
     });
 
-    // Add the toggle button at the end so it survives the rebuild
     const toggleBtn = document.createElement("div");
     toggleBtn.className = "key switch";
-    toggleBtn.innerText = "ABC/Special";
+    toggleBtn.innerText = usingSpecial ? "ABC" : "123";
     toggleBtn.onclick = () => {
       usingSpecial = !usingSpecial;
       buildKeyboard();
@@ -159,12 +153,6 @@ toggleBtn.onclick = () => {
   };
 
   buildKeyboard();
-  const toggleKeyboard = () => {
-  const keyboard = document.getElementById("keyboardContainer");
-  const controls = document.getElementById("controlRow");
-  keyboard.classList.toggle("hidden");
-  controls.classList.toggle("hidden");
-};
 </script>
 </body>
 </html>

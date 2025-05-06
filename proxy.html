@@ -3,207 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Keyboard for GoTTY</title>
+  <title>iOS-Style Virtual Keyboard</title>
   <style>
-    /* Basic Styling */
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
       margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #fff;
     }
     iframe {
       width: 100vw;
       height: 100vh;
       border: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
-    .keyboard-container {
+    .keyboard-container, .control-row {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #d1d3d6;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 20px;
-      flex-grow: 1;
+      padding: 10px 0;
+      z-index: 10;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
     }
     .key {
-      width: 5vw;
-      height: 5vh;
-      margin: 5px;
+      background: #fefefe;
+      margin: 4px;
+      border-radius: 8px;
+      width: 8%;
+      min-width: 40px;
+      height: 50px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      background: #f1f1f1;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      align-items: center;
+      box-shadow: inset 0 -1px 0 #bbb, 0 2px 3px rgba(0,0,0,0.15);
+      color: #333;
+      font-size: 1.2em;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 1.5em;
-      transition: background-color 0.3s;
+      user-select: none;
+      transition: background 0.2s;
     }
-    .key:hover {
-      background: #e0e0e0;
+    .key:active {
+      background: #e1e2e3;
     }
     .key.special {
-      background: #ffcc00;
+      background: #e6e7eb;
+      font-weight: 600;
     }
     .key.switch {
-      background: #99cc99;
+      background: #c2d9f8;
     }
-    .bottom-row {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-      width: 100%;
-    }
-    .control-row {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-      width: 100%;
-    }
-
-    /* Toggle Button Styling */
     .toggle-button {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background-color: rgba(0, 0, 0, 0.5);
+      bottom: 15px;
+      right: 15px;
+      width: 50px;
+      height: 50px;
+      background-color: rgba(50, 50, 50, 0.3);
       color: white;
       border-radius: 50%;
+      font-size: 1.2em;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5em;
+      z-index: 20;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <!-- GoTTY embedded in iframe -->
-  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net" title="GoTTY Terminal"></iframe>
+  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net"></iframe>
 
-  <!-- Keyboard UI -->
-  <div class="keyboard-container" id="keyboard"></div>
+  <!-- Toggle button -->
+  <div class="toggle-button" onclick="toggleKeyboard()">⌨️</div>
 
-  <div class="control-row">
-    <!-- Always visible control keys (Enter, Backspace, Shift, Ctrl, Alt) -->
-    <div class="key special" id="shift">⬇️</div>
-    <div class="key special" id="ctrl">Ctrl</div>
-    <div class="key special" id="alt">Alt</div>
-    <div class="key special" id="enter">⤵️</div>
-    <div class="key special" id="backspace">⬅️</div>
+  <!-- Virtual Keyboard -->
+  <div class="keyboard-container hidden" id="keyboardContainer">
+    <div class="key switch" onclick="toggleKeyboardMode()">ABC/#@!</div>
   </div>
 
-  <!-- Toggle Button for Keyboard -->
-  <div class="toggle-button" id="toggleKeyboardBtn">KB</div>
+  <div class="control-row hidden" id="controlRow">
+    <div class="key special" onclick="sendKey('Shift')">Shift</div>
+    <div class="key special" onclick="sendKey('Ctrl')">Ctrl</div>
+    <div class="key special" onclick="sendKey('Alt')">Alt</div>
+    <div class="key special" onclick="sendKey('Enter')">Enter</div>
+    <div class="key special" onclick="sendKey('Backspace')">⌫</div>
+  </div>
 
-  <!-- JavaScript -->
   <script>
-    // Alphabetical and Special Characters
     const alphabetKeys = [
-      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-      ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
-      [' '], // Removed Enter/Backspace from here
+      ['q','w','e','r','t','y','u','i','o','p'],
+      ['a','s','d','f','g','h','j','k','l'],
+      ['z','x','c','v','b','n','m',' ']
     ];
-
     const specialKeys = [
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-      ['!', '"', '#', '$', '%', '&', "'", '(', ')'],
-      ['*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?'],
-      ['[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'],
+      ['1','2','3','4','5','6','7','8','9','0'],
+      ['!','@','#','$','%','^','&','*','(',')'],
+      ['-','_','=','+','[','\\',']','{','}','|'],
+      [';',':','\'','"',',','.','/','<','>','?','`','~']
     ];
+    let isCapsLock = false;
+    let isShiftPressed = false;
+    let usingSpecialKeys = false;
 
-    let isCapsLock = false; // Track the Caps Lock state
-    let isShiftPressed = false; // Track the Shift key state
-    let usingSpecialKeys = false; // Track whether we're in special characters mode
+    const keyboardContainer = document.getElementById('keyboardContainer');
 
-    // Function to create the keyboard UI
-    const createKeyboard = () => {
-      const keyboardContainer = document.getElementById('keyboard');
-      // Add button to switch between alphabetic and special keys
-      const toggleButton = document.createElement('div');
-      toggleButton.classList.add('key', 'switch');
-      toggleButton.textContent = "ABC/Special";
-      toggleButton.onclick = toggleKeyboardMode;
-      keyboardContainer.appendChild(toggleButton);
+    function toggleKeyboardMode() {
+      usingSpecialKeys = !usingSpecialKeys;
+      createKeyboard();
+    }
 
-      // Create rows of keys (alphabetical or special)
-      const keysToUse = usingSpecialKeys ? specialKeys : alphabetKeys;
-      keysToUse.forEach(row => {
-        row.forEach(key => {
-          const keyButton = document.createElement('div');
-          keyButton.classList.add('key');
-          keyButton.textContent = key;
+    function toggleKeyboard() {
+      keyboardContainer.classList.toggle('hidden');
+      document.getElementById('controlRow').classList.toggle('hidden');
+    }
 
-          // Regular key behavior
-          keyButton.onclick = () => sendKey(key);
-          keyboardContainer.appendChild(keyButton);
+    function createKeyboard() {
+      keyboardContainer.innerHTML = '';
+      const switchBtn = document.createElement('div');
+      switchBtn.className = 'key switch';
+      switchBtn.textContent = usingSpecialKeys ? 'ABC' : '#@!';
+      switchBtn.onclick = toggleKeyboardMode;
+      keyboardContainer.appendChild(switchBtn);
+
+      const keys = usingSpecialKeys ? specialKeys : alphabetKeys;
+      keys.forEach(row => {
+        row.forEach(char => {
+          const key = document.createElement('div');
+          key.className = 'key';
+          key.textContent = char;
+          key.onclick = () => sendKey(char);
+          keyboardContainer.appendChild(key);
         });
       });
-    };
+    }
 
-    // Toggle between special characters and alphabet mode
-    const toggleKeyboardMode = () => {
-      usingSpecialKeys = !usingSpecialKeys; // Toggle the mode
-      // Recreate the keyboard with the new mode
-      document.getElementById('keyboard').innerHTML = ''; // Clear previous keyboard
-      createKeyboard(); // Rebuild keyboard
-    };
-
-    // Function to handle special keys like Shift, Caps, etc.
-    const handleSpecialKey = (key) => {
-      if (key === 'Shift') {
-        isShiftPressed = !isShiftPressed; // Toggle shift state
-        console.log('Shift pressed:', isShiftPressed);
-      } else if (key === 'Caps') {
-        isCapsLock = !isCapsLock; // Toggle Caps Lock
-        console.log('Caps Lock:', isCapsLock);
-      } else if (key === 'Backspace') {
-        sendKey('Backspace');
-      } else if (key === 'Enter') {
-        sendKey('Enter');
-      }
-    };
-
-    // Function to send the key press to the iframe
-    const sendKey = (char) => {
+    function sendKey(char) {
       const iframe = document.getElementById('terminalFrame');
-      const termDoc = iframe.contentWindow.document;
+      const termWindow = iframe.contentWindow;
 
       let keyToSend = char;
-
-      // Handle shift/caps behavior
-      if (isShiftPressed || isCapsLock) {
-        keyToSend = keyToSend.toUpperCase(); // Convert to uppercase if shift or caps is pressed
+      if ((isCapsLock || isShiftPressed) && char.length === 1) {
+        keyToSend = char.toUpperCase();
       }
 
-      const event = new KeyboardEvent('keydown', {
-        key: keyToSend,
-        bubbles: true
-      });
+      const downEvent = new KeyboardEvent('keydown', { key: keyToSend, bubbles: true });
+      const upEvent = new KeyboardEvent('keyup', { key: keyToSend, bubbles: true });
 
-      termDoc.dispatchEvent(event);
-    };
+      termWindow.document.dispatchEvent(downEvent);
+      termWindow.document.dispatchEvent(upEvent);
+    }
 
-    // Initialize the keyboard
     createKeyboard();
-
-    // Add toggle button functionality to show/hide the keyboard
-    const toggleButton = document.getElementById('toggleKeyboardBtn');
-    const keyboardContainer = document.getElementById('keyboard');
-
-    toggleButton.onclick = () => {
-      if (keyboardContainer.style.display === 'none' || keyboardContainer.style.display === '') {
-        keyboardContainer.style.display = 'flex';
-      } else {
-        keyboardContainer.style.display = 'none';
-      }
-    };
   </script>
 </body>
 </html>

@@ -130,7 +130,12 @@
   const buildKeyboard = () => {
     const container = document.getElementById("keyboard");
     container.innerHTML = "";
+const toggleBtn = document.getElementById("toggleKeyboardBtn");
+const keyboard = document.getElementById("keyboard");
 
+toggleBtn.onclick = () => {
+  keyboard.style.display = (keyboard.style.display === "none") ? "flex" : "none";
+};
     const layout = usingSpecial ? specialKeys : alphabetKeys;
     layout.forEach(row => {
       row.forEach(k => {

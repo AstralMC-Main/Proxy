@@ -3,171 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Keyboard</title>
+  <title>Virtual Keyboard for GoTTY</title>
   <style>
+    /* Basic Styling */
     body {
       font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #keyboard {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 5px;
+    iframe {
+      width: 100%;
+      height: 60vh;
+      border: none;
+    }
+    .keyboard-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       margin-top: 20px;
+      flex-grow: 1;
     }
-    button {
-      padding: 15px;
-      font-size: 18px;
-      background-color: #f0f0f0;
+    .key {
+      width: 5vw;
+      height: 10vh;
+      margin: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f1f1;
       border: 1px solid #ccc;
-      cursor: pointer;
       border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.5em;
+      transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: #e0e0e0;
+    .key:hover {
+      background: #e0e0e0;
     }
-    #toggleButton {
-      grid-column: span 10;
-      background-color: #ccc;
+    .key.special {
+      background: #ffcc00;
     }
-    #capsLockButton {
-      grid-column: span 10;
-      background-color: #ffcc00;
+    .key.switch {
+      background: #99cc99;
+    }
+    .bottom-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .control-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    /* Toggle Button Styling */
+    .toggle-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
 <body>
+  <h1>Virtual Keyboard for GoTTY</h1>
 
-  <!-- GoTTY Web Terminal Interface Embed -->
-  <div id="gotty-container">
-    <iframe src="https://backendconsole2468.serveo.net" width="100%" height="500px"></iframe>
+  <!-- GoTTY embedded in iframe -->
+  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net" title="GoTTY Terminal"></iframe>
+
+  <!-- Keyboard UI -->
+  <div class="keyboard-container" id="keyboard"></div>
+
+  <div class="control-row">
+    <!-- Always visible control keys (Enter, Backspace, Shift, Ctrl, Alt) -->
+    <div class="key special" id="shift">Shift</div>
+    <div class="key special" id="ctrl">Ctrl</div>
+    <div class="key special" id="alt">Alt</div>
+    <div class="key special" id="enter">Enter</div>
+    <div class="key special" id="backspace">Backspace</div>
   </div>
 
-  <div id="keyboard">
-    <button id="toggleButton" onclick="toggleKeyboard()">Switch to Special Characters</button>
-    <button id="capsLockButton" onclick="toggleCapsLock()">Caps Lock: Off</button>
-    
-    <!-- Regular Characters -->
-    <div id="regularKeyboard" style="display: block;">
-      <button onclick="appendKey('1')">1</button>
-      <button onclick="appendKey('2')">2</button>
-      <button onclick="appendKey('3')">3</button>
-      <button onclick="appendKey('4')">4</button>
-      <button onclick="appendKey('5')">5</button>
-      <button onclick="appendKey('6')">6</button>
-      <button onclick="appendKey('7')">7</button>
-      <button onclick="appendKey('8')">8</button>
-      <button onclick="appendKey('9')">9</button>
-      <button onclick="appendKey('0')">0</button>
-      <button onclick="appendKey('a')">a</button>
-      <button onclick="appendKey('b')">b</button>
-      <button onclick="appendKey('c')">c</button>
-      <button onclick="appendKey('d')">d</button>
-      <button onclick="appendKey('e')">e</button>
-      <button onclick="appendKey('f')">f</button>
-      <button onclick="appendKey('g')">g</button>
-      <button onclick="appendKey('h')">h</button>
-      <button onclick="appendKey('i')">i</button>
-      <button onclick="appendKey('j')">j</button>
-      <button onclick="appendKey('k')">k</button>
-      <button onclick="appendKey('l')">l</button>
-      <button onclick="appendKey('m')">m</button>
-      <button onclick="appendKey('n')">n</button>
-      <button onclick="appendKey('o')">o</button>
-      <button onclick="appendKey('p')">p</button>
-      <button onclick="appendKey('q')">q</button>
-      <button onclick="appendKey('r')">r</button>
-      <button onclick="appendKey('s')">s</button>
-      <button onclick="appendKey('t')">t</button>
-      <button onclick="appendKey('u')">u</button>
-      <button onclick="appendKey('v')">v</button>
-      <button onclick="appendKey('w')">w</button>
-      <button onclick="appendKey('x')">x</button>
-      <button onclick="appendKey('y')">y</button>
-      <button onclick="appendKey('z')">z</button>
-      <button onclick="appendKey(' ')">Space</button>
-      <button onclick="appendKey('Enter')">Enter</button>
-    </div>
+  <!-- Toggle Button for Keyboard -->
+  <div class="toggle-button" id="toggleKeyboardBtn">KB</div>
 
-    <!-- Special Characters -->
-    <div id="specialKeyboard" style="display: none;">
-      <button onclick="appendKey('!')">!</button>
-      <button onclick="appendKey('@')">@</button>
-      <button onclick="appendKey('#')">#</button>
-      <button onclick="appendKey('$')">$</button>
-      <button onclick="appendKey('%')">%</button>
-      <button onclick="appendKey('^')">^</button>
-      <button onclick="appendKey('&')">&</button>
-      <button onclick="appendKey('*')">*</button>
-      <button onclick="appendKey('(')">(</button>
-      <button onclick="appendKey(')')">)</button>
-      <button onclick="appendKey('-')">-</button>
-      <button onclick="appendKey('=')">=</button>
-      <button onclick="appendKey('\\[')">[</button> <!-- Escaped square brackets -->
-      <button onclick="appendKey('\\]')">]</button> <!-- Escaped square brackets -->
-      <button onclick="appendKey(';')">;</button>
-      <button onclick="appendKey(':')">:</button>
-      <button onclick="appendKey('\\"')">"</button> <!-- Escaped double quote -->
-      <button onclick="appendKey('\\'')">'</button> <!-- Escaped single quote -->
-      <button onclick="appendKey(',')">,</button>
-      <button onclick="appendKey('.')">.</button>
-      <button onclick="appendKey('/')">/</button>
-      <button onclick="appendKey('\\')">\\</button> <!-- Escaped backslash -->
-      <button onclick="appendKey('Enter')">Enter</button>
-    </div>
-  </div>
-
+  <!-- JavaScript -->
   <script>
-    let inputArea = null;
-    let capsLock = false;
+    // Alphabetical and Special Characters
+    const alphabetKeys = [
+      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+      ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+      [' ', 'Enter', 'Backspace'], // Removed Enter/Backspace from here
+    ];
 
-    // Function to set the focus on the GoTTY input area
-    function setInputArea() {
-      inputArea = document.querySelector('.gotty-terminal input');
-      if (!inputArea) {
-        setTimeout(setInputArea, 100); // Retry if inputArea isn't available yet
+    const specialKeys = [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+      ['!', '"', '#', '$', '%', '&', "'", '(', ')'],
+      ['*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?'],
+      ['[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'],
+    ];
+
+    let isCapsLock = false; // Track the Caps Lock state
+    let isShiftPressed = false; // Track the Shift key state
+    let usingSpecialKeys = false; // Track whether we're in special characters mode
+
+    // Function to create the keyboard UI
+    const createKeyboard = () => {
+      const keyboardContainer = document.getElementById('keyboard');
+      // Add button to switch between alphabetic and special keys
+      const toggleButton = document.createElement('div');
+      toggleButton.classList.add('key', 'switch');
+      toggleButton.textContent = "ABC/Special";
+      toggleButton.onclick = toggleKeyboardMode;
+      keyboardContainer.appendChild(toggleButton);
+
+      // Create rows of keys (alphabetical or special)
+      const keysToUse = usingSpecialKeys ? specialKeys : alphabetKeys;
+      keysToUse.forEach(row => {
+        row.forEach(key => {
+          const keyButton = document.createElement('div');
+          keyButton.classList.add('key');
+          keyButton.textContent = key;
+
+          // Regular key behavior
+          keyButton.onclick = () => sendKey(key);
+          keyboardContainer.appendChild(keyButton);
+        });
+      });
+    };
+
+    // Toggle between special characters and alphabet mode
+    const toggleKeyboardMode = () => {
+      usingSpecialKeys = !usingSpecialKeys; // Toggle the mode
+      // Recreate the keyboard with the new mode
+      document.getElementById('keyboard').innerHTML = ''; // Clear previous keyboard
+      createKeyboard(); // Rebuild keyboard
+    };
+
+    // Function to handle special keys like Shift, Caps, etc.
+    const handleSpecialKey = (key) => {
+      if (key === 'Shift') {
+        isShiftPressed = !isShiftPressed; // Toggle shift state
+        console.log('Shift pressed:', isShiftPressed);
+      } else if (key === 'Caps') {
+        isCapsLock = !isCapsLock; // Toggle Caps Lock
+        console.log('Caps Lock:', isCapsLock);
+      } else if (key === 'Backspace') {
+        sendKey('Backspace');
+      } else if (key === 'Enter') {
+        sendKey('Enter');
       }
-    }
+    };
 
-    // Function to append keys to input area
-    function appendKey(key) {
-      if (!inputArea) return;
-      if (key === 'Enter') {
-        inputArea.value += '\n';
+    // Function to send the key press to the iframe
+    const sendKey = (char) => {
+      const iframe = document.getElementById('terminalFrame');
+      const termDoc = iframe.contentWindow.document;
+
+      let keyToSend = char;
+
+      // Handle shift/caps behavior
+      if (isShiftPressed || isCapsLock) {
+        keyToSend = keyToSend.toUpperCase(); // Convert to uppercase if shift or caps is pressed
+      }
+
+      const event = new KeyboardEvent('keydown', {
+        key: keyToSend,
+        bubbles: true
+      });
+
+      termDoc.dispatchEvent(event);
+    };
+
+    // Initialize the keyboard
+    createKeyboard();
+
+    // Add toggle button functionality to show/hide the keyboard
+    const toggleButton = document.getElementById('toggleKeyboardBtn');
+    const keyboardContainer = document.getElementById('keyboard');
+
+    toggleButton.onclick = () => {
+      if (keyboardContainer.style.display === 'none' || keyboardContainer.style.display === '') {
+        keyboardContainer.style.display = 'flex';
       } else {
-        // If Caps Lock is on, make key uppercase; otherwise lowercase
-        inputArea.value += capsLock ? key.toUpperCase() : key.toLowerCase();
+        keyboardContainer.style.display = 'none';
       }
-      inputArea.dispatchEvent(new Event('input')); // Trigger input event
-      inputArea.focus(); // Keep focus on the input area
-    }
-
-    // Toggle between regular and special keyboard
-    function toggleKeyboard() {
-      const regularKeyboard = document.getElementById('regularKeyboard');
-      const specialKeyboard = document.getElementById('specialKeyboard');
-      const toggleButton = document.getElementById('toggleButton');
-
-      if (regularKeyboard.style.display === 'none') {
-        regularKeyboard.style.display = 'block';
-        specialKeyboard.style.display = 'none';
-        toggleButton.innerHTML = 'Switch to Special Characters';
-      } else {
-        regularKeyboard.style.display = 'none';
-        specialKeyboard.style.display = 'block';
-        toggleButton.innerHTML = 'Switch to Regular Characters';
-      }
-    }
-
-    // Toggle Caps Lock on and off (virtual button for iOS)
-    function toggleCapsLock() {
-      capsLock = !capsLock;
-      const capsLockButton = document.getElementById('capsLockButton');
-      capsLockButton.innerHTML = capsLock ? "Caps Lock: On" : "Caps Lock: Off";
-    }
-
-    // Initialize the input area once the document is loaded
-    window.onload = setInputArea;
+    };
   </script>
-
 </body>
 </html>

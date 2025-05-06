@@ -33,12 +33,11 @@
   </style>
 </head>
 <body>
-  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net"></iframe>
-
-<textarea
+  <textarea
   id="fakeInput"
-  style="position:fixed; bottom:0; width:100%; height:40px; opacity:0; z-index:999;"></textarea>
-
+  style="position:fixed; bottom:0; width:100%; height:40px; opacity:0; z-index:999;">
+  </textarea>
+  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net"></iframe>
 <script>
   document.getElementById('terminalFrame').addEventListener('click', () => {
     document.getElementById('fakeInput').focus();

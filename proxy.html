@@ -1,163 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iOS-Style Virtual Keyboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iOS Keyboard Integration</title>
   <style>
-    body {
+    body, html {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #fff;
+      padding: 0;
+      height: 100%;
     }
     iframe {
       width: 100vw;
       height: 100vh;
       border: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
     }
-    .keyboard-container, .control-row {
+    .input-overlay {
       position: fixed;
-      bottom: 0;
-      width: 100%;
-      background-color: #d1d3d6;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 10px 0;
+      bottom: 10px;
+      left: 10px;
+      width: calc(100% - 20px);
       z-index: 10;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
     }
-    .key {
-      background: #fefefe;
-      margin: 4px;
+    input {
+      width: 100%;
+      font-size: 18px;
+      padding: 10px;
+      border: 2px solid #ccc;
       border-radius: 8px;
-      width: 8%;
-      min-width: 40px;
-      height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: inset 0 -1px 0 #bbb, 0 2px 3px rgba(0,0,0,0.15);
-      color: #333;
-      font-size: 1.2em;
-      font-weight: 500;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s;
-    }
-    .key:active {
-      background: #e1e2e3;
-    }
-    .key.special {
-      background: #e6e7eb;
-      font-weight: 600;
-    }
-    .key.switch {
-      background: #c2d9f8;
-    }
-    .toggle-button {
-      position: fixed;
-      bottom: 15px;
-      right: 15px;
-      width: 50px;
-      height: 50px;
-      background-color: rgba(50, 50, 50, 0.3);
-      color: white;
-      border-radius: 50%;
-      font-size: 1.2em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      cursor: pointer;
-      backdrop-filter: blur(5px);
-    }
-    .hidden {
-      display: none;
     }
   </style>
 </head>
 <body>
-  <iframe id="terminalFrame" src="https://backendconsole2468.serveo.net"></iframe>
+  <iframe src="https://backendconsole2468.serveo.net"></iframe>
 
-  <!-- Toggle button -->
-  <div class="toggle-button" onclick="toggleKeyboard()">⌨️</div>
-
-  <!-- Virtual Keyboard -->
-  <div class="keyboard-container hidden" id="keyboardContainer">
-    <div class="key switch" onclick="toggleKeyboardMode()">ABC/#@!</div>
+  <div class="input-overlay">
+    <input id="inputBox" type="text" placeholder="Type here..." />
   </div>
-
-  <div class="control-row hidden" id="controlRow">
-    <div class="key special" onclick="sendKey('Shift')">Shift</div>
-    <div class="key special" onclick="sendKey('Ctrl')">Ctrl</div>
-    <div class="key special" onclick="sendKey('Alt')">Alt</div>
-    <div class="key special" onclick="sendKey('Enter')">Enter</div>
-    <div class="key special" onclick="sendKey('Backspace')">⌫</div>
-  </div>
-
 
   <script>
     const socket = new WebSocket("wss://backendconsole2469.serveo.net");
+    const input = document.getElementById("inputBox");
 
-    const alphabetKeys = [
-      ['q','w','e','r','t','y','u','i','o','p'],
-      ['a','s','d','f','g','h','j','k','l'],
-      ['z','x','c','v','b','n','m',' ']
-    ];
-
-    const specialKeys = [
-      ['Esc', 'Tab', 'CapsLock', 'Enter', 'Backspace'],
-      ['Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown'],
-      ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
-      ['Shift', 'Ctrl', 'Alt', 'Meta'],
-      ['F1','F2','F3','F4','F5','F6'],
-      ['F7','F8','F9','F10','F11','F12']
-    ];
-
-    let usingSpecial = false;
-
-    const sendKey = (key) => {
+    input.addEventListener("input", () => {
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(key);
+        const value = input.value;
+        socket.send(value);
+        input.value = ""; // Clear input after sending
       }
-    };
+    });
 
-    const buildKeyboard = () => {
-      const container = document.getElementById("keyboardContainer");
-      container.innerHTML = "";
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault(); // Prevent newline if needed
+      }
+    });
 
-      const layout = usingSpecial ? specialKeys : alphabetKeys;
-      layout.forEach(row => {
-        row.forEach(k => {
-          const key = document.createElement("div");
-          key.className = "key";
-          key.innerText = k === " " ? "Space" : k;
-          key.onclick = () => sendKey(k);
-          container.appendChild(key);
-        });
-      });
-
-      const toggleBtn = document.createElement("div");
-      toggleBtn.className = "key switch";
-      toggleBtn.innerText = usingSpecial ? "ABC" : "123";
-      toggleBtn.onclick = () => {
-        usingSpecial = !usingSpecial;
-        buildKeyboard();
-      };
-      container.appendChild(toggleBtn);
-    };
-
-    const toggleKeyboard = () => {
-      const container = document.getElementById("keyboardContainer");
-      container.classList.toggle("hidden");
-    };
-
-    buildKeyboard();
+    // Optional: focus input automatically on tap anywhere
+    document.body.addEventListener("touchstart", () => {
+      input.focus();
+    });
   </script>
 </body>
 </html>

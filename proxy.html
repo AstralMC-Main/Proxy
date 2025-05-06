@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+she<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -159,6 +159,12 @@ toggleBtn.onclick = () => {
   };
 
   buildKeyboard();
+  const toggleKeyboard = () => {
+  const keyboard = document.getElementById("keyboardContainer");
+  const controls = document.getElementById("controlRow");
+  keyboard.classList.toggle("hidden");
+  controls.classList.toggle("hidden");
+};
 </script>
 </body>
 </html>
